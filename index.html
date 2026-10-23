@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Sepetin Se'si</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap">
+<style>
+/* Layout: one kid-sized stage card, four big scene buttons on top, everything tappable and oversized. Single warm "picture-book" theme by choice. */
+:root{
+  --bg:#fde7b0;
+  --card:#fffaf0;
+  --ink:#3a2313;
+  --ink-soft:#6b4a2f;
+  --plum:#7b2458;
+  --plum-dk:#4c1236;
+  --plum-soft:#f3d9e6;
+  --basket:#9a6431;
+  --basket-dk:#4a2a12;
+  --egg:#c9a052;
+  --egg-hi:#ecd49a;
+  --green:#2b7d4f;
+  --green-soft:#d7f0df;
+  --star:#f2a516;
+  --font-d:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --font-b:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{background:var(--bg)}
+body{
+  color:var(--ink);font-family:var(--font-b);font-size:17px;
+  background-image:radial-gradient(circle at 12px 12px, rgba(123,36,88,.07) 4px, transparent 5px);
+  background-size:48px 48px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:780px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));padding-block:18px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-family:var(--font-d);font-weight:800;font-size:clamp(2rem,6vw,2.8rem);line-height:1;margin:0;color:var(--plum);text-wrap:balance}
+.sub{margin:4px 0 0;font-weight:700;color:var(--ink-soft)}
+.sub b{font-family:serif;font-size:1.3em;color:var(--plum)}
+button{font:inherit;color:inherit;cursor:pointer}
+.voice{margin:6px 0 0;font-size:.85rem;font-weight:700;color:var(--ink-soft)}
+.voice.ok{color:var(--green)}
+.voice.no{color:#9a3b12}
+.mute{flex:none;border:3px solid var(--basket-dk);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:800;display:flex;align-items:center;gap:6px}
+.mute svg{width:22px;height:22px}
+
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tab{border:3px solid var(--basket-dk);background:var(--card);border-radius:20px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--font-d);font-weight:700;font-size:1.05rem;box-shadow:0 4px 0 var(--basket-dk);transition:transform .12s}
+.tab svg{width:38px;height:38px}
+.tab:active{transform:translateY(3px);box-shadow:0 1px 0 var(--basket-dk)}
+.tab[aria-selected="true"]{background:var(--plum);color:#fff;border-color:var(--plum-dk);box-shadow:0 4px 0 var(--plum-dk)}
+:focus-visible{outline:4px solid var(--green);outline-offset:3px}
+
+.stage{background:var(--card);border:3px solid var(--basket-dk);border-radius:28px;padding:20px;box-shadow:0 6px 0 var(--basket-dk);display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
+.say{font-family:var(--font-d);font-weight:800;font-size:clamp(1.4rem,4.6vw,1.9rem);line-height:1.15;margin:0;color:var(--ink);text-wrap:balance;min-height:2.3em;display:flex;align-items:center;justify-content:center}
+.say.good{color:var(--green)}
+.hint{margin:0;color:var(--ink-soft);font-weight:700}
+
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:10px;align-items:end;width:100%}
+@media (max-width:560px){.hero{grid-template-columns:1fr}}
+.hero svg{width:100%;height:auto;display:block;max-width:100%}
+.big-letter{position:relative}
+.counter{position:absolute;top:-6px;right:4px;width:64px;height:64px;border-radius:50%;background:var(--plum);color:#fff;font-family:var(--font-d);font-weight:800;font-size:2.4rem;display:grid;place-items:center;transform:scale(0);border:4px solid var(--card);box-shadow:0 0 0 3px var(--plum-dk)}
+.counter.show{animation:pop .45s cubic-bezier(.3,1.7,.5,1) forwards}
+.equation{display:flex;align-items:center;gap:10px;font-family:var(--font-d);font-weight:800;font-size:1.3rem;color:var(--ink-soft);flex-wrap:wrap;justify-content:center}
+.chip{background:var(--plum-soft);color:var(--plum-dk);border-radius:999px;padding:4px 14px}
+.chip.egg{background:#f6e7c3;color:var(--basket-dk)}
+
+/* SVG parts */
+.tap{cursor:pointer}
+.anim,.fill,.egg-anim{transform-box:fill-box;transform-origin:center}
+.anim{animation:breathe 2.4s ease-in-out infinite}
+.dot.done .anim{animation:none}
+.dot.bounce .anim{animation:hop .55s cubic-bezier(.3,1.6,.5,1)}
+.dot.done rect{fill:var(--plum)}
+.wiggle{animation:wiggle .5s ease}
+.egg.bounce .egg-anim{animation:egghop .6s cubic-bezier(.3,1.6,.5,1)}
+.fill{transform:scale(0);transition:transform .4s cubic-bezier(.3,1.7,.5,1)}
+.slot.on .fill{transform:scale(1)}
+.slot.on .ghost{opacity:0}
+.ghost{transition:opacity .2s}
+
+.btn{border:3px solid var(--plum-dk);background:var(--plum);color:#fff;border-radius:999px;padding:10px 22px;font-family:var(--font-d);font-weight:800;font-size:1.15rem;box-shadow:0 4px 0 var(--plum-dk);transition:transform .12s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--plum-dk)}
+.btn.light{background:var(--card);color:var(--plum-dk)}
+.btn.green{background:var(--green);border-color:#17492c;box-shadow:0 4px 0 #17492c}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+.place svg{width:100%;max-width:440px;height:auto}
+.tray{display:flex;gap:18px;justify-content:center;background:var(--plum-soft);border-radius:999px;padding:12px 26px;border:3px dashed var(--plum)}
+.tray button{width:66px;height:66px;border:none;background:none;padding:0;transition:transform .3s, opacity .3s;animation:breathe 2.4s ease-in-out infinite}
+.tray button:nth-child(2){animation-delay:.3s}.tray button:nth-child(3){animation-delay:.6s}
+.tray button svg{width:100%;height:100%}
+.tray button.used{transform:scale(0);opacity:0;pointer-events:none}
+
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%}
+.choice{position:relative;border:3px solid var(--basket-dk);background:#fff;border-radius:22px;padding:8px;box-shadow:0 4px 0 var(--basket-dk);transition:transform .12s, background .2s}
+.choice svg{width:100%;height:auto;display:block}
+.choice.right{background:var(--green-soft);border-color:var(--green);box-shadow:0 4px 0 var(--green)}
+.choice.wrong{animation:shake .45s}
+.choice .badge{position:absolute;top:-12px;right:-8px;width:40px;height:40px;border-radius:50%;background:var(--basket-dk);color:#fff;font-family:var(--font-d);font-weight:800;font-size:1.4rem;display:grid;place-items:center;transform:scale(0)}
+.choice.wrong .badge,.choice.right .badge{animation:pop .4s cubic-bezier(.3,1.7,.5,1) forwards}
+.choice.right .badge{background:var(--green)}
+.stars{display:flex;gap:6px}
+.stars svg{width:40px;height:40px}
+.stars path{fill:#efe1c4;stroke:var(--basket-dk);stroke-width:2.5;transition:fill .3s}
+.stars .lit path{fill:var(--star)}
+.stars .lit{animation:pop .45s cubic-bezier(.3,1.7,.5,1)}
+
+.pad{position:relative;width:100%;max-width:520px;aspect-ratio:300/250;background:#fff;border-radius:22px;border:3px solid var(--basket-dk);overflow:hidden}
+.pad svg,.pad canvas{position:absolute;inset:0;width:100%;height:100%}
+.pad canvas{touch-action:none;cursor:crosshair}
+#demoLayer{transition:opacity .6s}
+.start-pulse{transform-box:fill-box;transform-origin:center;animation:breathe 1.4s ease-in-out infinite}
+
+#confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
+.cf{position:absolute;top:-30px;width:18px;height:18px;border-radius:4px;transform:rotate(45deg);animation:fall linear forwards}
+
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes hop{0%{transform:scale(1)}40%{transform:translateY(-18px) scale(1.35)}100%{transform:scale(1)}}
+@keyframes egghop{0%{transform:none}40%{transform:translateY(-26px) rotate(-8deg)}100%{transform:none}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.big-letter svg.wiggle,.basket-wrap svg.wiggle{transform-origin:50% 80%}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Sepetin Se'si</h1>
+      <p class="sub"><b>ث</b> harfini öğreniyoruz · üç nokta</p>
+      <p class="voice" id="voiceInfo">Türkçe ses aranıyor…</p>
+    </div>
+    <button class="mute" id="mute" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="waves" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+      <span id="muteLabel">Ses açık</span>
+    </button>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Oyunlar">
+    <button class="tab" role="tab" data-scene="tanis" aria-selected="true">
+      <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#f3d9e6"/><g fill="#7b2458"><rect x="16.5" y="8" width="7" height="7" rx="1.5" transform="rotate(45 20 11.5)"/><rect x="10.5" y="16" width="7" height="7" rx="1.5" transform="rotate(45 14 19.5)"/><rect x="22.5" y="16" width="7" height="7" rx="1.5" transform="rotate(45 26 19.5)"/></g><path d="M9 25c0 6 22 6 22-1" stroke="#7b2458" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>
+      Tanış
+    </button>
+    <button class="tab" role="tab" data-scene="yerlestir" aria-selected="false">
+      <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#f3d9e6"/><rect x="16" y="9" width="8" height="8" rx="1.5" transform="rotate(45 20 13)" fill="none" stroke="#7b2458" stroke-width="2" stroke-dasharray="2 2"/><path d="M20 33v-9m-4 4 4 4 4-4" stroke="#7b2458" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 20 28)"/></svg>
+      Yerleştir
+    </button>
+    <button class="tab" role="tab" data-scene="bul" aria-selected="false">
+      <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#f3d9e6"/><circle cx="18" cy="18" r="8" fill="none" stroke="#7b2458" stroke-width="3.5"/><path d="M24 24l7 7" stroke="#7b2458" stroke-width="4" stroke-linecap="round"/></svg>
+      Bul
+    </button>
+    <button class="tab" role="tab" data-scene="yaz" aria-selected="false">
+      <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#f3d9e6"/><path d="M12 28l2-6 13-13 4 4-13 13z" fill="#7b2458"/><path d="M12 28l6-2" stroke="#4c1236" stroke-width="2"/></svg>
+      Yaz
+    </button>
+  </nav>
+
+  <!-- SCENE 1 -->
+  <section class="stage" id="tanis">
+    <p class="say" id="say1">Noktalara dokun, sayalım!</p>
+    <div class="hero">
+      <div class="big-letter">
+        <div class="counter" id="counter1">0</div>
+        <svg id="letter1" viewBox="0 0 300 250" role="img" aria-label="Se harfi"></svg>
+      </div>
+      <div class="basket-wrap">
+        <svg id="basket" class="tap" viewBox="0 0 260 240" role="button" tabindex="0" aria-label="Sepet: yumurtaları say">
+          <path d="M48 140 C 48 20, 212 20, 212 140" fill="none" stroke="#4a2a12" stroke-width="16" stroke-linecap="round"/>
+          <path d="M48 140 C 48 20, 212 20, 212 140" fill="none" stroke="#9a6431" stroke-width="8" stroke-linecap="round"/>
+          <g class="egg" data-i="0"><g class="egg-anim"><ellipse cx="85" cy="122" rx="31" ry="41" fill="#c9a052" stroke="#4a2a12" stroke-width="3.5"/><ellipse cx="74" cy="104" rx="6" ry="10" fill="#ecd49a" transform="rotate(-18 74 104)"/></g></g>
+          <g class="egg" data-i="1"><g class="egg-anim"><ellipse cx="130" cy="108" rx="31" ry="43" fill="#c9a052" stroke="#4a2a12" stroke-width="3.5"/><ellipse cx="119" cy="89" rx="6" ry="10" fill="#ecd49a" transform="rotate(-18 119 89)"/></g></g>
+          <g class="egg" data-i="2"><g class="egg-anim"><ellipse cx="175" cy="122" rx="31" ry="41" fill="#c9a052" stroke="#4a2a12" stroke-width="3.5"/><ellipse cx="164" cy="104" rx="6" ry="10" fill="#ecd49a" transform="rotate(-18 164 104)"/></g></g>
+          <path d="M36 162 L224 162 Q 216 232 176 234 L84 234 Q 44 232 36 162 Z" fill="#9a6431" stroke="#4a2a12" stroke-width="4" stroke-linejoin="round"/>
+          <g stroke="#4a2a12" stroke-width="2.5" fill="none" opacity=".55" stroke-linecap="round">
+            <path d="M46 190 Q 130 206 214 190"/><path d="M58 216 Q 130 230 202 216"/>
+            <path d="M80 165 L92 232"/><path d="M110 165 L114 233"/><path d="M150 165 L146 233"/><path d="M180 165 L168 232"/>
+          </g>
+          <rect x="22" y="144" width="216" height="24" rx="9" fill="#4a2a12"/>
+        </svg>
+      </div>
+    </div>
+    <div class="equation" aria-hidden="true"><span class="chip">3 nokta</span> = <span class="chip egg">3 yumurta</span></div>
+    <p class="hint">Harfe dokun, adını duy. Sepete dokun, yumurtaları say.</p>
+    <button class="btn light" id="reset1">Baştan say</button>
+  </section>
+
+  <!-- SCENE 2 -->
+  <section class="stage" id="yerlestir" hidden>
+    <p class="say" id="say2">Noktaları harfin üstüne koy!</p>
+    <div class="place"><svg id="letter2" viewBox="0 0 300 250" role="img" aria-label="Noktasız Se harfi"></svg></div>
+    <div class="tray" id="tray" aria-label="Noktalar">
+      <button aria-label="Nokta 1"><svg viewBox="0 0 40 40"><rect x="9" y="9" width="22" height="22" rx="5" transform="rotate(45 20 20)" fill="#7b2458" stroke="#4c1236" stroke-width="2.5"/></svg></button>
+      <button aria-label="Nokta 2"><svg viewBox="0 0 40 40"><rect x="9" y="9" width="22" height="22" rx="5" transform="rotate(45 20 20)" fill="#7b2458" stroke="#4c1236" stroke-width="2.5"/></svg></button>
+      <button aria-label="Nokta 3"><svg viewBox="0 0 40 40"><rect x="9" y="9" width="22" height="22" rx="5" transform="rotate(45 20 20)" fill="#7b2458" stroke="#4c1236" stroke-width="2.5"/></svg></button>
+    </div>
+    <button class="btn light" id="reset2">Tekrar oyna</button>
+  </section>
+
+  <!-- SCENE 3 -->
+  <section class="stage" id="bul" hidden>
+    <p class="say" id="say3">Üç noktalı Se hangisi?</p>
+    <div class="choices" id="choices"></div>
+    <div class="stars" id="stars" aria-label="Yıldızlar"></div>
+    <p class="hint">Noktaları say: bir, iki, üç!</p>
+  </section>
+
+  <!-- SCENE 4 -->
+  <section class="stage" id="yaz" hidden>
+    <p class="say" id="say4">Parmağınla Se yaz!</p>
+    <div class="pad" id="pad">
+      <svg viewBox="0 0 300 250" aria-hidden="true">
+        <path id="guide" fill="none" stroke="#f3d9e6" stroke-width="36" stroke-linecap="round"/>
+        <path id="guideLine" fill="none" stroke="#c98cab" stroke-width="3" stroke-dasharray="1 11" stroke-linecap="round"/>
+        <g id="guideDots"></g>
+        <g class="start-pulse"><circle id="startDot" r="11" fill="#2b7d4f"/></g>
+        <g id="demoLayer" opacity="0">
+          <path id="demoPath" fill="none" stroke="#7b2458" stroke-width="24" stroke-linecap="round"/>
+          <g id="demoDots"></g>
+        </g>
+      </svg>
+      <canvas id="canvas"></canvas>
+    </div>
+    <p class="hint">Yeşil noktadan başla, sağdan sola çiz. Sonra üç noktayı koy.</p>
+    <div class="row">
+      <button class="btn light" id="demo">Nasıl yazılır?</button>
+      <button class="btn light" id="clear">Sil</button>
+      <button class="btn green" id="done">Bitti!</button>
+    </div>
+  </section>
+</div>
+<div id="confetti" aria-hidden="true"></div>
+
+<script>
+(function(){
+// ---------- shared shapes ----------
+const BODY = "M245 82 C 252 210, 48 205, 60 100"; // right tip -> left tip (Arabic direction)
+const DOTS = {
+  sa:[[150,26],[124,64],[176,64]],
+  ta:[[124,50],[176,50]],
+  ba:[[150,226]]
+};
+const NUM = ["Bir","İki","Üç"];
+const $ = s => document.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+
+function diamond(x,y,cls,extra){
+  return `<g class="${cls}" transform="translate(${x} ${y})" ${extra||""}><g class="anim"><rect x="-15" y="-15" width="30" height="30" rx="6" transform="rotate(45)" fill="#7b2458" stroke="#4c1236" stroke-width="3.5"/></g></g>`;
+}
+function bodySVG(){
+  return `<path d="${BODY}" fill="none" stroke="#4c1236" stroke-width="38" stroke-linecap="round"/>
+          <path d="${BODY}" fill="none" stroke="#7b2458" stroke-width="29" stroke-linecap="round"/>
+          <path d="M238 92 C 240 160, 130 190, 80 150" fill="none" stroke="#a5467d" stroke-width="5" stroke-linecap="round" opacity=".6"/>`;
+}
+function letterSVG(kind){
+  return bodySVG() + DOTS[kind].map(([x,y])=>diamond(x,y,"static")).join("");
+}
+
+// ---------- sound ----------
+let muted=false, ac=null, voices=[];
+function audio(){
+  if(!ac){ try{ ac = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ac=null; } }
+  if(ac && ac.state==="suspended") ac.resume();
+  return ac;
+}
+function tone(f,dur=.2,type="sine",when=0,vol=.22,slide=1){
+  if(muted) return; const a=audio(); if(!a) return;
+  const t=a.currentTime+when, o=a.createOscillator(), g=a.createGain();
+  o.type=type; o.frequency.setValueAtTime(f,t);
+  if(slide!==1) o.frequency.exponentialRampToValueAtTime(f*slide,t+dur);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+dur+.05);
+}
+const pop = i => { tone([523,659,784][i%3],.22,"triangle",0,.28,1.25); tone([1046,1318,1568][i%3],.12,"sine",.03,.08); };
+const cheer = () => [523,659,784,1046,1318].forEach((f,i)=>tone(f,.28,"triangle",i*.09,.22));
+const oops = () => { tone(330,.22,"sine",0,.18,.7); tone(262,.26,"sine",.18,.16,.8); };
+// Recorded clips (data URIs) keyed by the exact sentence. When a clip exists it is played instead of the device voice.
+const CLIPS = {};
+let trVoice=null, voicesKnown=false, clipAudio=null;
+function rankVoice(v){
+  const n=(v.name||"").toLowerCase(); let s=0;
+  if(/natural|neural|online|premium|enhanced|wavenet/.test(n)) s+=5;
+  if(/emel|ahmet|yelda|google|cem/.test(n)) s+=3;
+  if(v.localService===false) s+=1;
+  return s;
+}
+function loadVoices(){
+  try{
+    voices = speechSynthesis.getVoices()||[];
+    voicesKnown = voices.length>0;
+    const tr = voices.filter(v=>/^tr([-_]|$)/i.test(v.lang||""));
+    tr.sort((a,b)=>rankVoice(b)-rankVoice(a));
+    trVoice = tr[0]||null;
+  }catch(e){}
+  showVoice();
+}
+function showVoice(){
+  const el=document.getElementById("voiceInfo"); if(!el) return;
+  if(Object.keys(CLIPS).length){ el.textContent="Ses: kayıtlı Türkçe sesler"; el.className="voice ok"; return; }
+  if(!("speechSynthesis" in window)){ el.textContent="Bu tarayıcı konuşamıyor, sadece efekt sesleri var"; el.className="voice no"; return; }
+  if(trVoice){ el.textContent="Türkçe ses: "+trVoice.name.replace(/^Microsoft |^Google /,"").replace(/ - .*$/,""); el.className="voice ok"; }
+  else if(voicesKnown){ el.textContent="Bu cihazda Türkçe ses yok, sadece efekt sesleri çalacak"; el.className="voice no"; }
+  else { el.textContent="Türkçe ses aranıyor…"; el.className="voice"; }
+}
+if("speechSynthesis" in window){ loadVoices(); try{ speechSynthesis.onvoiceschanged = loadVoices; }catch(e){} setTimeout(loadVoices,1500); }
+else showVoice();
+function say(text,lang="tr-TR",rate=.85){
+  if(muted) return;
+  if(CLIPS[text]){
+    try{ if(clipAudio) clipAudio.pause(); clipAudio=new Audio(CLIPS[text]); clipAudio.play().catch(()=>{}); }catch(e){}
+    return;
+  }
+  if(!("speechSynthesis" in window)) return;
+  // Never read Turkish with a foreign voice: if the device lists voices but none is Turkish, stay silent.
+  if(voicesKnown && !trVoice) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=rate; u.pitch=1.1;
+    if(trVoice){ u.voice=trVoice; u.lang=trVoice.lang; }
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+$("#mute").addEventListener("click",()=>{
+  muted=!muted;
+  $("#mute").setAttribute("aria-pressed",muted);
+  $("#muteLabel").textContent = muted ? "Ses kapalı" : "Ses açık";
+  $("#waves").style.display = muted ? "none" : "";
+  if(muted) try{ speechSynthesis.cancel(); }catch(e){}
+});
+
+// ---------- confetti ----------
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function confetti(){
+  if(reduce) return;
+  const box=$("#confetti"), cols=["#7b2458","#f2a516","#2b7d4f","#c9a052","#e0609e"];
+  for(let i=0;i<34;i++){
+    const s=document.createElement("span"); s.className="cf";
+    s.style.left=Math.random()*100+"vw"; s.style.background=cols[i%cols.length];
+    s.style.animationDuration=(1.6+Math.random()*1.4)+"s"; s.style.animationDelay=(Math.random()*.4)+"s";
+    box.appendChild(s); setTimeout(()=>s.remove(),3400);
+  }
+}
+function retrigger(el,cls){ el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); }
+function onTap(el,fn){
+  el.addEventListener("click",fn);
+  el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(e); } });
+}
+
+// ---------- tabs ----------
+const scenes=["tanis","yerlestir","bul","yaz"];
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  audio(); tone(700,.08,"sine",0,.12);
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b===t));
+  scenes.forEach(id=>$("#"+id).hidden = id!==t.dataset.scene);
+  if(t.dataset.scene==="yaz") sizeCanvas();
+}));
+
+// ---------- SCENE 1: meet & count ----------
+const L1=$("#letter1");
+L1.innerHTML = `<g id="body1" class="tap" role="button" tabindex="0" aria-label="Harfin adı">${bodySVG()}</g>` +
+  DOTS.sa.map(([x,y],i)=>diamond(x,y,"dot tap",`data-i="${i}" role="button" tabindex="0" aria-label="Nokta"`)).join("");
+let counted=new Set();
+const say1=$("#say1"), c1=$("#counter1");
+L1.querySelectorAll(".dot").forEach(d=>onTap(d,()=>{
+  audio();
+  const i=+d.dataset.i;
+  retrigger(d,"bounce");
+  const fresh=!counted.has(i);
+  if(fresh){ counted.add(i); d.classList.add("done"); }
+  const n=counted.size;
+  pop(n-1);
+  if(fresh){
+    c1.textContent=n; retrigger(c1,"show");
+    if(n<3){ say1.textContent=NUM[n-1]+"!"; say1.classList.remove("good"); say(NUM[n-1]); }
+    else{
+      say1.textContent="Üç! Se'nin üç noktası var."; say1.classList.add("good");
+      say("Üç! Aferin. Se harfinin üç noktası var.");
+      setTimeout(()=>{ cheer(); confetti(); },350);
+    }
+  }
+}));
+onTap($("#body1"),()=>{
+  audio(); retrigger(L1,"wiggle"); tone(392,.25,"triangle",0,.2,1.1);
+  say("Se"); say1.textContent="Bu harfin adı: Se"; say1.classList.remove("good");
+});
+let eggBusy=false;
+onTap($("#basket"),()=>{
+  if(eggBusy) return; eggBusy=true; audio();
+  say("Bir, iki, üç yumurta!",undefined,.75);
+  const say1b=$("#say1");
+  document.querySelectorAll(".egg").forEach((e,i)=>setTimeout(()=>{
+    retrigger(e,"bounce"); pop(i);
+    say1b.textContent = i<2 ? NUM[i]+" yumurta" : "Üç yumurta, üç nokta!";
+    say1b.classList.toggle("good", i===2);
+  },i*750));
+  setTimeout(()=>{ eggBusy=false; },2400);
+});
+$("#reset1").addEventListener("click",()=>{
+  counted.clear(); L1.querySelectorAll(".dot").forEach(d=>d.classList.remove("done","bounce"));
+  c1.classList.remove("show"); say1.textContent="Noktalara dokun, sayalım!"; say1.classList.remove("good");
+});
+
+// ---------- SCENE 2: place the dots ----------
+const L2=$("#letter2");
+L2.innerHTML = bodySVG() + DOTS.sa.map(([x,y],i)=>`
+  <g class="slot tap" data-i="${i}" transform="translate(${x} ${y})">
+    <rect class="ghost" x="-15" y="-15" width="30" height="30" rx="6" transform="rotate(45)" fill="#fff" stroke="#7b2458" stroke-width="3" stroke-dasharray="5 4"/>
+    <g class="fill"><rect x="-15" y="-15" width="30" height="30" rx="6" transform="rotate(45)" fill="#7b2458" stroke="#4c1236" stroke-width="3.5"/></g>
+  </g>`).join("");
+let placed=0;
+const say2=$("#say2"), trayBtns=[...document.querySelectorAll("#tray button")];
+function placeNext(){
+  if(placed>=3) return; audio();
+  const slot=L2.querySelectorAll(".slot")[placed];
+  slot.classList.add("on");
+  const used=trayBtns.find(b=>!b.classList.contains("used")); if(used) used.classList.add("used");
+  pop(placed); placed++;
+  if(placed<3){ say2.textContent=NUM[placed-1]+"!"; say(NUM[placed-1]); }
+  else{
+    say2.textContent="Harika! Se tamam oldu."; say2.classList.add("good");
+    say("Üç! Harika. Se harfi tamam oldu.");
+    setTimeout(()=>{ cheer(); confetti(); },350);
+  }
+}
+trayBtns.forEach(b=>b.addEventListener("click",placeNext));
+L2.querySelectorAll(".slot").forEach(s=>s.addEventListener("click",placeNext));
+$("#reset2").addEventListener("click",()=>{
+  placed=0; L2.querySelectorAll(".slot").forEach(s=>s.classList.remove("on"));
+  trayBtns.forEach(b=>b.classList.remove("used"));
+  say2.textContent="Noktaları harfin üstüne koy!"; say2.classList.remove("good");
+});
+
+// ---------- SCENE 3: find Se ----------
+const starsBox=$("#stars");
+for(let i=0;i<5;i++) starsBox.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 40 40"><path d="M20 3l5 11 12 1.4-9 8.2 2.6 12L20 29.5 9.4 35.6 12 23.6 3 15.4 15 14z" stroke-linejoin="round"/></svg>`);
+let stars=0, lastOrder="", locked=false;
+const say3=$("#say3");
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function round(){
+  let order; do{ order=shuffle(["ba","ta","sa"]); }while(order.join()===lastOrder);
+  lastOrder=order.join(); locked=false;
+  const box=$("#choices"); box.innerHTML="";
+  order.forEach(k=>{
+    const b=document.createElement("button"); b.className="choice"; b.dataset.k=k;
+    b.setAttribute("aria-label", DOTS[k].length+" noktalı harf");
+    b.innerHTML=`<span class="badge">${DOTS[k].length}</span><svg viewBox="0 0 300 250">${letterSVG(k)}</svg>`;
+    b.addEventListener("click",()=>pick(b));
+    box.appendChild(b);
+  });
+  say3.textContent="Üç noktalı Se hangisi?"; say3.classList.remove("good");
+}
+function pick(b){
+  if(locked) return; audio();
+  if(b.dataset.k==="sa"){
+    locked=true; b.classList.add("right");
+    stars++; const s=starsBox.children[stars-1]; if(s) s.classList.add("lit");
+    cheer();
+    if(stars>=5){
+      say3.textContent="Süper! Beş yıldız topladın!"; say3.classList.add("good");
+      say("Süper! Beş yıldız topladın!"); confetti();
+      setTimeout(()=>{ stars=0; [...starsBox.children].forEach(c=>c.classList.remove("lit")); round(); },3200);
+    }else{
+      say3.textContent="Aferin! Bu Se."; say3.classList.add("good");
+      say("Aferin! Bu Se. Üç noktası var.");
+      setTimeout(round,2200);
+    }
+  }else{
+    retrigger(b,"wrong"); oops();
+    const n=DOTS[b.dataset.k].length;
+    say3.textContent=`Bunda ${n===1?"bir":"iki"} nokta var. Üç noktalıyı bul!`; say3.classList.remove("good");
+    say(`Bunda ${n===1?"bir":"iki"} nokta var. Üç noktalıyı bul.`);
+  }
+}
+round();
+
+// ---------- SCENE 4: write ----------
+$("#guide").setAttribute("d",BODY); $("#guideLine").setAttribute("d",BODY); $("#demoPath").setAttribute("d",BODY);
+$("#startDot").setAttribute("cx",245); $("#startDot").setAttribute("cy",82);
+$("#guideDots").innerHTML = DOTS.sa.map(([x,y])=>`<rect x="${x-15}" y="${y-15}" width="30" height="30" rx="6" transform="rotate(45 ${x} ${y})" fill="#fbeef5" stroke="#c98cab" stroke-width="2.5" stroke-dasharray="4 4"/>`).join("");
+$("#demoDots").innerHTML = DOTS.sa.map(([x,y],i)=>`<g class="slot" transform="translate(${x} ${y})"><g class="fill"><rect x="-15" y="-15" width="30" height="30" rx="6" transform="rotate(45)" fill="#7b2458"/></g></g>`).join("");
+
+const cv=$("#canvas"), ctx=cv.getContext("2d");
+let strokes=[], cur=null;
+function sizeCanvas(){
+  const r=cv.getBoundingClientRect(); if(!r.width) return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+  redraw();
+}
+function redraw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#7b2458";
+  ctx.lineWidth=cv.width*0.07;
+  strokes.forEach(s=>{
+    ctx.beginPath();
+    s.forEach((p,i)=>{ const x=p[0]*cv.width, y=p[1]*cv.height; i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    if(s.length===1){ ctx.lineTo(s[0][0]*cv.width+.1, s[0][1]*cv.height); }
+    ctx.stroke();
+  });
+}
+function pt(e){ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]; }
+cv.addEventListener("pointerdown",e=>{ audio(); cv.setPointerCapture(e.pointerId); cur=[pt(e)]; strokes.push(cur); redraw(); tone(600,.05,"sine",0,.05); });
+cv.addEventListener("pointermove",e=>{ if(!cur) return; cur.push(pt(e)); redraw(); });
+["pointerup","pointercancel","pointerleave"].forEach(ev=>cv.addEventListener(ev,()=>{ cur=null; }));
+window.addEventListener("resize",sizeCanvas);
+
+let demoTimers=[];
+$("#demo").addEventListener("click",()=>{
+  audio(); demoTimers.forEach(clearTimeout); demoTimers=[];
+  const p=$("#demoPath"), L=p.getTotalLength(), layer=$("#demoLayer");
+  layer.querySelectorAll(".slot").forEach(s=>s.classList.remove("on"));
+  p.style.transition="none"; p.style.strokeDasharray=L; p.style.strokeDashoffset=L;
+  layer.style.opacity=1; void p.getBoundingClientRect();
+  p.style.transition="stroke-dashoffset 1.8s ease-in-out"; p.style.strokeDashoffset=0;
+  say("Sağdan başla, aşağı in, yukarı çık.");
+  $("#say4").textContent="Sağdan başla, aşağı in, yukarı çık.";
+  layer.querySelectorAll(".slot").forEach((s,i)=>demoTimers.push(setTimeout(()=>{
+    s.classList.add("on"); pop(i); say(NUM[i]);
+    $("#say4").textContent = i<2 ? NUM[i]+"!" : "Üç nokta! Şimdi sen yaz.";
+  },2100+i*800)));
+  demoTimers.push(setTimeout(()=>{ layer.style.opacity=0; },5600));
+});
+$("#clear").addEventListener("click",()=>{ strokes=[]; redraw(); $("#say4").textContent="Parmağınla Se yaz!"; $("#say4").classList.remove("good"); });
+$("#done").addEventListener("click",()=>{
+  audio();
+  if(!strokes.length){ $("#say4").textContent="Önce parmağınla çiz!"; say("Önce parmağınla çiz."); return; }
+  $("#say4").textContent="Harika yazdın!"; $("#say4").classList.add("good");
+  say("Harika yazdın! Üç noktayı unutmadın mı?"); cheer(); confetti();
+});
+})();
+</script>
+
+</body>
+</html>
